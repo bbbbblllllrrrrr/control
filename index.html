@@ -1,140 +1,65 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>粉紫 MQTT 控制面板</title>
-  <style>
-    :root { --ink:#443650; --muted:#85778f; --purple:#9a71d6; --deep:#7651bd; --pale:#f5efff; --line:#e9ddfa; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; font-family:system-ui,-apple-system,"Microsoft JhengHei",sans-serif; color:var(--ink); background:radial-gradient(ellipse at 15% 6%,#eedbff 0,transparent 40%),radial-gradient(ellipse at 93% 88%,#f2e1fa 0,transparent 42%),#fbf9ff; display:grid; place-items:center; padding:24px; }
-    main { width:min(100%,570px); background:rgba(255,255,255,.92); padding:35px; border:1px solid #efe7f8; border-radius:28px; box-shadow:0 18px 60px #8d6ab626; }
-    .eyebrow { color:#9a7aba; font-size:12px; font-weight:700; letter-spacing:2px; }
-    h1 { margin:8px 0 7px; font-size:29px; letter-spacing:.2px; }
-    .hint { color:var(--muted); margin:0 0 26px; font-size:14px; line-height:1.7; }
-    .status { display:flex; align-items:center; justify-content:space-between; gap:15px; background:var(--pale); border:1px solid var(--line); border-radius:18px; padding:17px 18px; margin-bottom:21px; }
-    .status-title { font-weight:750; font-size:14px; }
-    .sub { display:block; color:var(--muted); font-size:12px; margin-top:5px; overflow-wrap:anywhere; }
-    .pill { white-space:nowrap; border-radius:30px; padding:7px 12px; font-size:12px; font-weight:800; background:#ece6f1; color:#776b80; }
-    .pill::before { content:""; display:inline-block; height:8px; width:8px; background:currentColor; border-radius:50%; margin-right:6px; }
-    .pill.connected { background:#e0f6e9; color:#28774c; }
-    .pill.connecting { background:#fff1d4; color:#99680c; }
-    .pill.offline { background:#ffe4ea; color:#b34b70; }
-    .controls { text-align:center; padding:17px 0 12px; }
-    .send { cursor:pointer; width:180px; height:180px; border:0; border-radius:50%; color:white; background:linear-gradient(145deg,#c59bed,#9164d1); box-shadow:0 14px 32px #9569cb60,inset 0 3px 7px #ffffff50; font-size:23px; font-weight:800; letter-spacing:.7px; transition:transform .17s,box-shadow .17s,opacity .17s; }
-    .send:not(:disabled):hover { transform:translateY(-3px); box-shadow:0 18px 38px #9569cb7a,inset 0 3px 7px #ffffff50; }
-    .send:not(:disabled):active { transform:scale(.96); }
-    .send:disabled { cursor:not-allowed; opacity:.55; }
-    .button-note { margin-top:16px; color:var(--muted); font-size:13px; }
-    .button-note strong { color:var(--deep); }
-    .info { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:22px 0; }
-    .info > div { background:#faf7ff; border:1px solid #f0e8fa; padding:13px 15px; border-radius:14px; min-width:0; }
-    .label { color:var(--muted); font-size:12px; margin-bottom:5px; }
-    .value { font-size:14px; font-weight:750; overflow-wrap:anywhere; }
-    .section-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
-    h2 { margin:0; font-size:15px; }
-    .linkbtn { border:0; background:transparent; color:var(--deep); cursor:pointer; font-weight:700; font-size:12px; padding:4px; }
-    .log { height:180px; overflow:auto; border:1px solid var(--line); background:#fcfaff; border-radius:14px; padding:10px 13px; font-size:12px; line-height:1.8; }
-    .entry { border-bottom:1px solid #f0eafa; padding:4px 0; overflow-wrap:anywhere; }
-    .entry:last-child { border:0; }
-    .time { color:#a396ae; margin-right:7px; font-variant-numeric:tabular-nums; }
-    footer { margin-top:17px; font-size:11px; color:#92859b; line-height:1.6; }
-    @media(max-width:480px) { main { padding:24px 19px; } h1 {font-size:25px;} .info {grid-template-columns:1fr;} .send {width:160px;height:160px;} }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blab MQTT 三按鈕控制台</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#4d395e;background:#fbf8ff}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 12% 8%,#eedafa,transparent 42%),linear-gradient(135deg,#fffaff,#f4ecff)}main{max-width:760px;margin:0 auto;padding:42px 20px 64px}h1{font-size:clamp(1.6rem,5vw,2.3rem);margin:7px 0 6px}p{margin:0}.eyebrow{letter-spacing:.17em;color:#9972b7;font-size:.77rem;font-weight:750}.sub{color:#8a7598;margin-bottom:26px}.panel{border:1px solid #e7d7f2;border-radius:24px;background:#ffffffdf;box-shadow:0 14px 45px #73509515;padding:25px;margin:18px 0}.statusline{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.pill{display:inline-flex;gap:8px;align-items:center;border-radius:99px;padding:9px 14px;background:#f0e7f9;font-weight:750}.dot{height:10px;width:10px;border-radius:50%;background:#a18da9}.pill.connected{background:#e5f6eb;color:#236c43}.pill.connected .dot{background:#32a567}.pill.connecting,.pill.reconnecting{background:#fff3dc;color:#926421}.pill.connecting .dot,.pill.reconnecting .dot{background:#dfa43c}.pill.error,.pill.offline{background:#ffedf0;color:#9b475b}.pill.error .dot,.pill.offline .dot{background:#e16c83}.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}.datum{padding:13px 15px;background:#f8f2fd;border-radius:13px;overflow-wrap:anywhere}.datum small{display:block;font-size:.77rem;color:#967eaa;margin-bottom:5px}.datum strong{font-size:.96rem}.buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:20px}.action{border:0;min-height:135px;padding:16px 8px;border-radius:22px;color:#fff;cursor:pointer;background:linear-gradient(145deg,#c99eea,#a779d4);box-shadow:0 8px 17px #a579c244;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:transform .14s,filter .14s}.action:hover:not(:disabled){transform:translateY(-3px);filter:brightness(1.04)}.action:active:not(:disabled){transform:translateY(1px)}.action:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}.action strong{font-size:1.25rem}.action span{font-size:.83rem;opacity:.95}.hint{margin-top:15px;color:#8a7598;font-size:.88rem}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.outline{border:1px solid #d8c0eb;background:#fff;color:#77529a;border-radius:12px;padding:8px 11px;cursor:pointer}.notice{padding:12px 14px;border-radius:12px;background:#f8f2fd;color:#755b8b;font-size:.92rem;margin-top:18px;overflow-wrap:anywhere}.log{height:235px;overflow:auto;border:1px solid #eee4f5;border-radius:12px;background:#fffcff;padding:8px 12px;font-family:ui-monospace,Consolas,monospace;font-size:.82rem}.log div{border-bottom:1px solid #f0e8f6;padding:8px 0;overflow-wrap:anywhere}.log time{color:#a48ab6;margin-right:10px}.log .good{color:#27744a}.log .bad{color:#b04b6b}.log .info{color:#76589a}@media(max-width:500px){.details{grid-template-columns:1fr}.buttons{gap:9px}.action{min-height:120px;border-radius:17px}.panel{padding:18px}main{padding-top:26px}}
+</style>
 </head>
 <body>
 <main>
-  <div class="eyebrow">LAVENDER · SMART CONTROL</div>
-  <h1>MQTT 控制面板</h1>
-  <p class="hint">自動連接伺服器，一鍵發送指令，隨時掌握連線狀態。</p>
-
-  <section class="status" aria-live="polite">
-    <div><div class="status-title">伺服器連線狀態</div><span id="statusDetail" class="sub">正在準備連線…</span></div>
-    <span id="status" class="pill connecting">連線中</span>
-  </section>
-
-  <section class="controls">
-    <button id="sendBtn" class="send" disabled>發送指令</button>
-    <div class="button-note">點擊發送 <strong>b1_on</strong></div>
-  </section>
-
-  <section class="info" aria-label="MQTT 設定">
-    <div><div class="label">MQTT Broker</div><div class="value">broker.emqx.io</div></div>
-    <div><div class="label">網頁安全連線</div><div class="value">WSS · 8084</div></div>
-    <div><div class="label">訂閱 / 發布 Topic</div><div class="value">jjlab/a</div></div>
-    <div><div class="label">最新收到的內容</div><div id="lastMessage" class="value">尚無訊息</div></div>
-  </section>
-
-  <div class="section-header"><h2>即時事件紀錄</h2><button id="clearLog" class="linkbtn">清除紀錄</button></div>
-  <div id="log" class="log" role="log" aria-live="polite"></div>
-  <footer>注意：broker.emqx.io 為公開測試伺服器。任何人都可能訂閱或向 jjlab/a 發送訊息，請勿傳送私人資料或操作具安全風險的設備。</footer>
+<div class="eyebrow">LAVENDER · MQTT CONTROLLER</div><h1>三按鈕 MQTT 控制台</h1><p class="sub">開啟網頁自動連線 · 即時顯示連線狀態</p>
+<section class="panel" aria-label="連線狀態">
+  <div class="statusline"><h2 style="margin:0;font-size:1.18rem">伺服器狀態</h2><span id="state" class="pill connecting" role="status" aria-live="polite"><span class="dot"></span><span id="stateText">準備連線…</span></span></div>
+  <div class="details"><div class="datum"><small>MQTT Broker</small><strong>broker.emqx.io</strong></div><div class="datum"><small>瀏覽器連線（WSS）</small><strong>8084 / mqtt</strong></div><div class="datum"><small>設備端 MQTT TCP</small><strong>1883</strong></div><div class="datum"><small>訂閱 / 發布主題</small><strong>Blab</strong></div></div>
+  <p class="notice" id="detail" aria-live="polite">網頁正在初始化 MQTT 用戶端…</p>
+</section>
+<section class="panel" aria-label="指令按鈕"><h2 style="margin:0;font-size:1.18rem">控制按鈕</h2><div class="buttons"><button class="action" data-payload="A_on" disabled><strong>A</strong><span>發送 A_on</span></button><button class="action" data-payload="B_on" disabled><strong>B</strong><span>發送 B_on</span></button><button class="action" data-payload="C_on" disabled><strong>C</strong><span>發送 C_on</span></button></div><p class="hint">連線成功後按鈕才可使用。每次點擊都會將指令發布到 <b>Blab</b>，QoS 0、不保留。</p></section>
+<section class="panel"><div class="row"><h2 style="margin:0 0 14px;font-size:1.18rem">即時訊息與事件紀錄</h2><button class="outline" type="button" id="clear">清除紀錄</button></div><div id="logs" class="log" role="log" aria-live="polite"></div><p class="hint">最新收到的訊息：<strong id="received">尚無</strong></p></section>
 </main>
-<script src="https://unpkg.com/mqtt@5.15.0/dist/mqtt.min.js"></script>
+<script src="https://unpkg.com/mqtt@5.14.1/dist/mqtt.min.js"></script>
 <script>
+(function(){
   'use strict';
-  const BROKER = 'wss://broker.emqx.io:8084/mqtt';
-  const TOPIC = 'jjlab/a';
-  const PAYLOAD = 'b1_on';
-  const $ = id => document.getElementById(id);
-  const sendBtn = $('sendBtn');
-  let client;
-
-  function log(message) {
-    const entry = document.createElement('div');
-    entry.className = 'entry';
-    const time = document.createElement('span');
-    time.className = 'time';
-    time.textContent = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-    entry.append(time, document.createTextNode(message));
-    $('log').prepend(entry);
-    while ($('log').children.length > 80) $('log').lastElementChild.remove();
+  const URL='wss://broker.emqx.io:8084/mqtt', TOPIC='Blab';
+  const pill=document.getElementById('state'),stateText=document.getElementById('stateText'),detail=document.getElementById('detail'),logs=document.getElementById('logs'),received=document.getElementById('received');
+  const buttons=[...document.querySelectorAll('[data-payload]')];
+  let client=null, subscribed=false;
+  function log(message,kind='info'){
+    const line=document.createElement('div');const time=document.createElement('time');time.textContent=new Date().toLocaleTimeString('zh-TW',{hour12:false});
+    const value=document.createElement('span');value.className=kind;value.textContent=message;
+    line.append(time,value);logs.prepend(line);while(logs.children.length>80)logs.lastElementChild.remove();
   }
-  function setStatus(label, type, detail) {
-    $('status').textContent = label;
-    $('status').className = 'pill ' + type;
-    $('statusDetail').textContent = detail;
-    sendBtn.disabled = type !== 'connected';
-  }
-  $('clearLog').addEventListener('click', () => { $('log').replaceChildren(); log('已清除畫面紀錄'); });
-  sendBtn.addEventListener('click', () => {
-    if (!client || !client.connected) { log('無法傳送：目前未連線'); return; }
-    client.publish(TOPIC, PAYLOAD, { qos: 1, retain: false }, error => {
-      if (error) log('發送失敗：' + error.message);
-      else log('✓ 已發布到 ' + TOPIC + '：' + PAYLOAD + '（Broker 確認）');
+  function state(name,title,description){pill.className='pill '+name;stateText.textContent=title;detail.textContent=description;buttons.forEach(b=>b.disabled=!(name==='connected'&&subscribed));}
+  document.getElementById('clear').addEventListener('click',()=>{logs.replaceChildren();log('紀錄已清除');});
+  buttons.forEach(button=>button.addEventListener('click',()=>{
+    if(!client?.connected || !subscribed){log('無法發送：尚未成功連線並訂閱','bad');return;}
+    const payload=button.dataset.payload;
+    client.publish(TOPIC,payload,{qos:0,retain:false},error=>{
+      if(error){log('發布失敗：'+error.message,'bad');return;}
+      log('已發布到 '+TOPIC+' → '+payload,'good');
     });
-  });
-
-  if (typeof mqtt === 'undefined') {
-    setStatus('載入失敗', 'offline', '無法載入 MQTT.js，請檢查網路或 CDN 連線');
-    log('MQTT.js 程式庫載入失敗');
-  } else {
-    log('準備自動連線至 broker.emqx.io');
-    client = mqtt.connect(BROKER, {
-      clientId: 'jjlab_web_' + Math.random().toString(16).slice(2, 10),
-      clean: true,
-      keepalive: 60,
-      connectTimeout: 12000,
-      reconnectPeriod: 3000,
-      protocolVersion: 4
-    });
-    client.on('connect', () => {
-      setStatus('已連線', 'connected', 'MQTT Broker 連線成功');
-      log('✓ 已連接 MQTT Broker');
-      client.subscribe(TOPIC, { qos: 1 }, (err, granted) => {
-        if (err) { log('訂閱失敗：' + err.message); return; }
-        log('✓ 訂閱成功：' + (granted || []).map(x => x.topic).join(', '));
+  }));
+  if(!window.mqtt){state('error','程式庫載入失敗','請檢查網路或 CDN 是否被封鎖，重新整理網頁。');log('MQTT.js 程式庫無法載入','bad');return;}
+  state('connecting','連線中…','正在透過安全 WebSocket 連接 broker.emqx.io:8084');log('正在連接 '+URL);
+  try{
+    client=mqtt.connect(URL,{clientId:'blab_web_'+Math.random().toString(16).slice(2,10),clean:true,keepalive:60,connectTimeout:15000,reconnectPeriod:3000});
+    client.on('connect',()=>{
+      subscribed=false;state('connecting','已連線，訂閱中…','已連接 Broker，正在訂閱主題 Blab');log('MQTT Broker 連線成功','good');
+      client.subscribe(TOPIC,{qos:0},(err,granted)=>{
+        if(err || !granted?.length || granted[0].qos===128){subscribed=false;state('error','訂閱失敗','Broker 已連上，但 Blab 主題訂閱失敗。');log('訂閱失敗：'+(err?.message||'Broker 拒絕訂閱'),'bad');return;}
+        subscribed=true;state('connected','已連線 ✓','已連接並訂閱 Blab，可以傳送三種指令。');log('已成功訂閱 '+TOPIC,'good');
       });
     });
-    client.on('message', (topic, payload) => {
-      const value = payload.toString();
-      $('lastMessage').textContent = value || '（空訊息）';
-      log('← 收到 [' + topic + ']：' + (value || '（空訊息）'));
-    });
-    client.on('reconnect', () => { setStatus('重新連線中', 'connecting', '連線中斷，正在每 3 秒重試'); log('↻ 正在重新連線…'); });
-    client.on('offline', () => { setStatus('已離線', 'offline', '目前無法連接伺服器'); log('伺服器連線離線'); });
-    client.on('close', () => { setStatus('連線中斷', 'offline', '連線已關閉，將嘗試重新連接'); });
-    client.on('error', err => { setStatus('連線異常', 'offline', '連線發生錯誤，將自動重試'); log('錯誤：' + err.message); });
-  }
+    client.on('message',(topic,payload)=>{const value=payload.toString();received.textContent=value;log('收到 ['+topic+'] '+value,'good');});
+    client.on('reconnect',()=>{subscribed=false;state('reconnecting','重新連線中…','連線中斷，每 3 秒自動重試。');log('正在自動重新連線…');});
+    client.on('offline',()=>{subscribed=false;state('offline','已離線','目前與 MQTT Broker 失去連線，等待自動重連。');log('MQTT 已離線','bad');});
+    client.on('close',()=>{subscribed=false;if(pill.className.includes('connected'))state('offline','已斷線','連線已關閉，等待自動重連。');log('連線已關閉');});
+    client.on('error',error=>{subscribed=false;state('error','連線異常','連線發生錯誤，將依設定自動重試。');log('錯誤：'+error.message,'bad');});
+  }catch(error){state('error','無法建立連線','初始化失敗，請重新整理網頁。');log('初始化錯誤：'+error.message,'bad');}
+})();
 </script>
 </body>
 </html>
